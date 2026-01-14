@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Pay - Gestión Integral de Avances</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #f5c842 0%, #f5a742 50%, #6da5d9 100%);
+            --accent-orange: #f97316;
+            --accent-blue: #2563eb;
+            --dark-bg: #111111;
+            --white: #ffffff;
+            --text-gray: #6b7280;
+            --phone-bg: #f8fafc;
+            --success-green: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body { 
+            background: var(--primary-gradient);
+            background-attachment: fixed;
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; padding: 20px;
+        }
+
+        .presentation-container { display: flex; max-width: 1400px; width: 100%; gap: 50px; align-items: flex-start; }
+
+        /* --- MOCKUP --- */
+        .phone-mockup {
+            width: 380px; height: 780px; background: var(--dark-bg);
+            border-radius: 50px; position: relative; padding: 12px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+
+        .phone-notch {
+            width: 150px; height: 25px; background: #000;
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            border-radius: 0 0 20px 20px; z-index: 100;
+        }
+
+        .phone-screen {
+            width: 100%; height: 100%; background: var(--phone-bg);
+            border-radius: 40px; overflow: hidden; display: flex; flex-direction: column;
+            position: relative;
+        }
+
+        /* --- VISTAS OVERLAYS --- */
+        .view-overlay {
+            position: absolute; top: 0; left: 100%; width: 100%; height: 100%;
+            background: var(--phone-bg); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 50;
+            display: flex; flex-direction: column;
+        }
+        .view-overlay.active { left: 0; }
+
+        .view-header { background: var(--accent-blue); padding: 50px 20px 20px; color: white; display: flex; align-items: center; gap: 15px; }
+        .btn-back { cursor: pointer; font-size: 20px; font-weight: bold; }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .header-avance { background: var(--accent-blue); padding: 55px 20px 25px; color: white; text-align: center; }
+        .credit-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            margin: -30px 20px 20px; padding: 25px; border-radius: 20px;
+            color: white; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .card-balance { font-size: 26px; font-weight: 800; }
+
+        .scrollable-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+        /* Card Items para selección */
+        .card-item {
+            background: white; padding: 15px; border-radius: 15px;
+            margin-bottom: 12px; border: 1px solid #e2e8f0; cursor: pointer;
+            transition: 0.2s;
+        }
+        .card-item:hover { border-color: var(--accent-orange); }
+
+        .bank-data-box {
+            background: #f8fafc; border: 1px dashed #cbd5e1;
+            padding: 12px; border-radius: 10px; margin-top: 10px;
+            font-size: 13px; color: #334155; display: none;
+        }
+
+        /* Formularios */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 11px; color: var(--text-gray); margin-bottom: 6px; font-weight: 800; text-transform: uppercase; }
+        .form-input { width: 100%; padding: 14px; border: 2px solid #f1f5f9; border-radius: 12px; font-size: 14px; outline: none; transition: 0.3s; }
+        .form-input:focus { border-color: var(--accent-orange); }
+
+        .btn-primary { 
+            width: 100%; padding: 16px; background: var(--accent-orange); color: white; 
+            border: none; border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 15px;
+        }
+
+        /* TICKET */
+        .ticket-box {
+            background: white; border-radius: 20px; padding: 30px 20px;
+            margin-top: 20px; position: relative; border: 1px solid #f1f5f9;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); text-align: center;
+        }
+        .success-icon { width: 70px; height: 70px; background: var(--success-green); color: white; 
+                       border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                       font-size: 35px; margin: 0 auto 20px; }
+        
+        .summary-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; }
+
+        /* NAV */
+        .bottom-nav { width: 100%; height: 80px; background: var(--dark-bg); display: flex; justify-content: space-around; align-items: center; z-index: 10; }
+        .nav-item { color: var(--text-gray); text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .nav-active { color: var(--accent-orange) !important; }
+
+        /* INFO DERECHA (PRESENTACIÓN) */
+        .info-column { 
+            flex: 1.5; 
+            padding: 40px; 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 30px; 
+            max-height: 780px; 
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .info-column h1 { color: var(--accent-blue); font-size: 28px; margin-bottom: 20px; border-bottom: 3px solid var(--accent-orange); display: inline-block; }
+        .info-column h2 { color: var(--dark-bg); font-size: 20px; margin-top: 30px; margin-bottom: 15px; background: #eef2ff; padding: 10px; border-radius: 10px; }
+        .info-column h3 { color: var(--accent-orange); font-size: 16px; margin-top: 15px; margin-bottom: 8px; }
+        .info-column p { font-size: 14px; line-height: 1.6; color: #4b5563; margin-bottom: 10px; }
+        .info-column ul { margin-left: 20px; margin-bottom: 15px; }
+        .info-column li { font-size: 13px; margin-bottom: 5px; color: #374151; }
+        .security-tag { display: inline-block; background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    
+    <div class="mockup-column">
+        <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                
+                <div class="header-avance">
+                    <h2 style="font-size: 18px;">Línea de Crédito</h2>
+                    <p style="font-size: 12px; opacity: 0.8;">Smart Pay Advance</p>
+                </div>
+
+                <div class="scrollable-content">
+                    <div class="credit-card">
+                        <p style="font-size: 10px; opacity: 0.7;">DISPONIBLE PARA RETIRO</p>
+                        <div class="card-balance">$4,500.00</div>
+                        <p style="font-size: 11px; margin-top: 10px;">Interés preferencial: 1.5%</p>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+                        <button class="btn-primary" style="flex:1;" onclick="openView('viewRetirar')">💸 Retirar</button>
+                        <button class="btn-primary" style="flex:1; background: var(--accent-blue);" onclick="openView('viewPagarSeleccion')">💳 Pagar</button>
+                    </div>
+
+                    <h3 style="font-size:14px; margin-bottom:12px;">Últimos Movimientos</h3>
+                    <div style="background:white; padding:15px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; border: 1px solid #f1f5f9;">
+                        <div><b>Pago de Cuota #1</b><br><small>10 Dic 2023</small></div>
+                        <div style="color: var(--success-green); font-weight:bold;">+$125.50</div>
+                    </div>
+                </div>
+
+                <div id="viewRetirar" class="view-overlay">
+                    <div class="view-header">
+                        <span class="btn-back" onclick="closeView('viewRetirar')">←</span>
+                        <b>Solicitar Avance</b>
+                    </div>
+                    <div class="scrollable-content">
+                        <div class="form-group">
+                            <label>Monto a Retirar</label>
+                            <input type="number" class="form-input" id="inputMonto" placeholder="Ej: 500">
+                        </div>
+                        <div class="form-group">
+                            <label>Cuenta de Destino</label>
+                            <select class="form-input" id="inputCuenta">
+                                <option>Ahorros Personal (...8829)</option>
+                                <option>Corriente Nómina (...4410)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Plazo de Pago</label>
+                            <select class="form-input" id="inputCuotas">
+                                <option value="3">3 Cuotas Mensuales</option>
+                                <option value="6">6 Cuotas Mensuales</option>
+                                <option value="12">12 Cuotas Mensuales</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="procesarRevisionRetiro()">Ver Resumen</button>
+                    </div>
+                </div>
+
+                <div id="viewRevisionRetiro" class="view-overlay">
+                    <div class="view-header">
+                        <span class="btn-back" onclick="closeView('viewRevisionRetiro')">←</span>
+                        <b>Confirmar Retiro</b>
+                    </div>
+                    <div class="scrollable-content">
+                        <div style="background:white; padding:20px; border-radius:20px; border:1px solid #e2e8f0;">
+                            <div class="summary-row"><span>Monto Principal:</span><b id="revMonto">$0.00</b></div>
+                            <div class="summary-row"><span>Tasa Mensual:</span><b>1.5%</b></div>
+                            <div class="summary-row"><span>Total Intereses:</span><b id="revInteres">$0.00</b></div>
+                            <div class="summary-row" style="border:none; margin-top:10px; font-size:16px;">
+                                <span>Total a Devolver:</span><b style="color:var(--accent-orange)" id="revTotal">$0.00</b>
+                            </div>
+                        </div>
+                        <button class="btn-primary" style="margin-top:20px;" onclick="mostrarExitoRetiro()">Confirmar Transferencia</button>
+                    </div>
+                </div>
+
+                <div id="viewExitoRetiro" class="view-overlay" style="z-index: 120;">
+                    <div class="scrollable-content" style="display:flex; flex-direction:column; justify-content:center;">
+                        <div class="ticket-box">
+                            <div class="success-icon">✓</div>
+                            <h2 style="color:var(--success-green);">¡Dinero Enviado!</h2>
+                            <p style="color:var(--text-gray); font-size:13px; margin-bottom:25px;">La transferencia está en proceso</p>
+                            <div class="summary-row"><span>Monto:</span><b id="tickRetiroMonto">$0.00</b></div>
+                            <div class="summary-row"><span>Destino:</span><b id="tickRetiroCuenta">Cuenta</b></div>
+                        </div>
+                        <button class="btn-primary" style="margin-top:30px; background:var(--dark-bg);" onclick="location.reload()">Ir al Inicio</button>
+                    </div>
+                </div>
+
+
+                <div id="viewPagarSeleccion" class="view-overlay">
+                    <div class="view-header">
+                        <span class="btn-back" onclick="closeView('viewPagarSeleccion')">←</span>
+                        <b>Pagar Avance</b>
+                    </div>
+                    <div class="scrollable-content">
+                        <label>Retiros Activos</label>
+                        <div class="card-item" onclick="mostrarCuotas()">
+                            <b>Retiro #8821</b>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:5px;">
+                                <span>Total: $500.00</span>
+                                <span style="color:var(--accent-orange)">2 pendientes</span>
+                            </div>
+                        </div>
+
+                        <div id="listaCuotas" style="margin-top:20px; display:none;">
+                            <label>Seleccione la Cuota</label>
+                            <div class="card-item" onclick="prepararPago('Cuota #1', 166.67, 2.50)">
+                                <b>Cuota #1 (Diciembre)</b>
+                                <div style="font-size:12px;">Monto: $166.67 + $2.50 (Interés)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="viewMetodoPago" class="view-overlay">
+                    <div class="view-header">
+                        <span class="btn-back" onclick="closeView('viewMetodoPago')">←</span>
+                        <b>Método de Pago</b>
+                    </div>
+                    <div class="scrollable-content">
+                        <div style="background:#eff6ff; padding:15px; border-radius:12px; margin-bottom:20px; font-size:14px;">
+                            <b>Total a Pagar: <span id="pagoTotalTxt">$0.00</span></b>
+                        </div>
+                        <div class="card-item" onclick="selectMetodo('pm')">
+                            <b>📱 Pago Móvil</b>
+                            <div id="data-pm" class="bank-data-box">Banesco (0134) | V-12.345.678 | 0412-5556677</div>
+                        </div>
+                        <div class="card-item" onclick="selectMetodo('tr')">
+                            <b>🏦 Transferencia</b>
+                            <div id="data-tr" class="bank-data-box">Smart Pay S.A | J-55667788 | Mercantil: 0105...0011</div>
+                        </div>
+                        <div class="card-item" onclick="selectMetodo('usd')">
+                            <b>💵 Depósito USD</b>
+                            <div id="data-usd" class="bank-data-box">Zelle: pagos@smartpay.com | Efectivo Taquilla</div>
+                        </div>
+
+                        <div id="formReferencia" style="display:none; margin-top:20px;">
+                            <div class="form-group"><label>Fecha</label><input type="date" class="form-input"></div>
+                            <div class="form-group"><label>Referencia (6 dígitos)</label><input type="text" class="form-input" maxlength="6" id="refPago"></div>
+                            <button class="btn-primary" onclick="confirmarPagoFinal()">Reportar Pago</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="viewTicketPago" class="view-overlay" style="z-index: 120;">
+                    <div class="scrollable-content" style="display:flex; flex-direction:column; justify-content:center;">
+                        <div class="ticket-box">
+                            <div class="success-icon" style="background:var(--accent-blue)">✓</div>
+                            <h2 style="color:var(--accent-blue);">¡Pago Recibido!</h2>
+                            <p style="color:var(--text-gray); font-size:13px; margin-bottom:25px;">Estamos validando tu transacción</p>
+                            <div class="summary-row"><span>Referencia:</span><b id="tickRef">#000000</b></div>
+                            <div class="summary-row"><span>Monto:</span><b id="tickMonto">$0.00</b></div>
+                        </div>
+                        <button class="btn-primary" style="margin-top:30px; background:var(--dark-bg);" onclick="location.reload()">Ir al Inicio</button>
+                    </div>
+                </div>
+
+
+                <nav class="bottom-nav">
+    <div class="nav-item nav-active" onclick="window.location.href='dashboard.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <br>Inicio
+    </div>
+    <div class="nav-item" onclick="window.location.href='tiendas.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <br>Diario
+    </div>
+    <div class="nav-item" onclick="window.location.href='billetera.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <rect x="6" y="8" width="12" height="8" rx="1"></rect>
+            <line x1="18" y1="12" x2="18.01" y2="12"></line>
+        </svg>
+        <br>Billetera
+    </div>
+    <div class="nav-item" onclick="window.location.href='avance.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+            <line x1="19" y1="8" x2="19" y2="14"></line>
+            <line x1="22" y1="11" x2="16" y2="11"></line>
+        </svg>
+        <br>Avance
+    </div>
+    <div class="nav-item" onclick="window.location.href='perfil.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <br>Perfil
+    </div>
+</nav>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="info-column">
+        <h1>Smart Pay Pro: Gestión de Avances</h1>
+        <p>Este módulo representa la columna vertebral financiera de la plataforma, permitiendo la monetización de la línea de crédito otorgada al usuario bajo un modelo de rentabilidad sostenible.</p>
+
+        <h2>1. Dashboard de Línea de Crédito</h2>
+        <p>Muestra la capacidad financiera inmediata del usuario. Integra cálculos de riesgo en tiempo real basados en el comportamiento de pago histórico.</p>
+        <ul>
+            <li><b>Línea de Crédito:</b> Representa el capital máximo disponible para el usuario.</li>
+            <li><b>Interés Preferencial (1.5%):</b> Tasa competitiva diseñada para incentivar el uso recurrente del avance bancario.</li>
+        </ul>
+        <span class="security-tag">SEGURIDAD: Cifrado de saldos bajo estándares bancarios.</span>
+
+        <h2>2. Flujo de Solicitud de Avance (Retiro)</h2>
+        <p>Proceso optimizado para la conversión de crédito en efectivo disponible en cuentas bancarias personales.</p>
+        <h3>Funciones de Campos:</h3>
+        <ul>
+            <li><b>Monto a Retirar:</b> Validación dinámica contra el saldo disponible para evitar sobregiros.</li>
+            <li><b>Cuenta de Destino:</b> Selección de cuentas verificadas mediante procesos de KYC previos.</li>
+            <li><b>Plazo de Pago:</b> Selector de cuotas que automatiza el cálculo de amortización e intereses futuros.</li>
+        </ul>
+        <span class="security-tag">SEGURIDAD: Verificación de identidad biométrica antes del desembolso.</span>
+
+        <h2>3. Pasarela de Recaudación (Pagos)</h2>
+        <p>Sistema multicanal para el reporte de pagos offline, facilitando la amortización de cuotas mediante conciliación bancaria.</p>
+        <h3>Gestión de Identidad y Pago:</h3>
+        <ul>
+            <li><b>Selección de Retiro:</b> Permite al usuario identificar qué deuda específica desea abonar, mejorando la trazabilidad contable.</li>
+            <li><b>Métodos de Pago:</b> Soporte para Pago Móvil, Transferencias Nacionales y Depósitos USD (Zelle/Efectivo).</li>
+            <li><b>Referencia (6 dígitos):</b> Campo crítico para la conciliación automatizada. Evita reportes duplicados mediante validación de hash.</li>
+        </ul>
+        <span class="security-tag">SEGURIDAD: Anti-Double Spending y validación de referencias bancarias.</span>
+
+        <h2>4. Gamificación y Retención (XP)</h2>
+        <p>Vinculado directamente al módulo de Perfil, el cumplimiento de pagos en este módulo otorga puntos de experiencia (XP).</p>
+        <ul>
+            <li><b>Niveles (Platinum/Diamond):</b> Los pagos puntuales desbloquean mejores tasas de interés y límites de crédito más altos.</li>
+        </ul>
+
+        <h2>5. Seguridad de Capa Bancaria</h2>
+        <p>Cada movimiento de dinero está protegido bajo protocolos de seguridad robustos.</p>
+        <ul>
+            <li><b>PIN Transaccional:</b> Requerido para confirmar tanto retiros como pagos.</li>
+            <li><b>Validación KYC:</b> Acceso centralizado a datos de identidad para garantizar que el dinero fluya solo a titulares verificados.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function openView(id) { document.getElementById(id).classList.add('active'); }
+    function closeView(id) { document.getElementById(id).classList.remove('active'); }
+
+    /* LÓGICA DE RETIRO (AVANCE) */
+    function procesarRevisionRetiro() {
+        const monto = parseFloat(document.getElementById('inputMonto').value) || 0;
+        const cuotas = parseInt(document.getElementById('inputCuotas').value);
+        if(monto <= 0) { alert('Monto inválido'); return; }
+        
+        const interes = monto * 0.015 * cuotas;
+        const total = monto + interes;
+
+        document.getElementById('revMonto').innerText = '$' + monto.toFixed(2);
+        document.getElementById('revInteres').innerText = '$' + interes.toFixed(2);
+        document.getElementById('revTotal').innerText = '$' + total.toFixed(2);
+        
+        // Datos para el ticket
+        document.getElementById('tickRetiroMonto').innerText = '$' + monto.toFixed(2);
+        document.getElementById('tickRetiroCuenta').innerText = document.getElementById('inputCuenta').value.split(' ')[0];
+        
+        openView('viewRevisionRetiro');
+    }
+
+    function mostrarExitoRetiro() {
+        openView('viewExitoRetiro');
+    }
+
+    /* LÓGICA DE PAGO */
+    function mostrarCuotas() {
+        document.getElementById('listaCuotas').style.display = 'block';
+    }
+
+    let montoPagoFinal = 0;
+    function prepararPago(nombre, monto, interes) {
+        montoPagoFinal = monto + interes;
+        document.getElementById('pagoTotalTxt').innerText = '$' + montoPagoFinal.toFixed(2);
+        openView('viewMetodoPago');
+    }
+
+    function selectMetodo(tipo) {
+        document.querySelectorAll('.bank-data-box').forEach(el => el.style.display = 'none');
+        document.getElementById('data-' + tipo).style.display = 'block';
+        document.getElementById('formReferencia').style.display = 'block';
+    }
+
+    function confirmarPagoFinal() {
+        const ref = document.getElementById('refPago').value;
+        if(ref.length < 6) { alert('Ingrese 6 dígitos de referencia'); return; }
+        document.getElementById('tickRef').innerText = '#' + ref;
+        document.getElementById('tickMonto').innerText = '$' + montoPagoFinal.toFixed(2);
+        openView('viewTicketPago');
+    }
+</script>
+
+</body>
+</html>

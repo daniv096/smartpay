@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Pay - Registro de Usuario</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { justify-content: flex-start; padding: 0 50px; background: var(--primary-gradient); background-attachment: fixed; }
+        .main-container { display: flex; align-items: center; gap: 60px; width: 100%; max-width: 1300px; margin: 0 auto; }
+        
+        /* Panel Derecho */
+        .info-panel { flex: 1; background: rgba(255, 255, 255, 0.9); padding: 40px; border-radius: 30px; backdrop-filter: blur(10px); min-height: 600px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .info-panel h1 { color: var(--accent-blue); font-size: 28px; margin-bottom: 20px; border-bottom: 3px solid var(--accent-orange); display: inline-block; }
+        
+        /* Teléfono y Slides */
+        .phone-screen { display: flex; flex-direction: column; overflow-y: auto; padding: 40px 20px; }
+        .step-container { display: none; flex-direction: column; animation: fadeIn 0.4s; }
+        .step-container.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .nav-buttons { display: flex; gap: 10px; margin: 20px 0; }
+        .btn-next { background: var(--accent-blue); flex: 2; }
+        .btn-prev { background: #eee; flex: 1; color: #333; }
+        
+        .circle-icon { width: 70px; height: 70px; background: #f0f7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; margin: 0 auto 15px; color: var(--accent-blue); border: 2px dashed var(--accent-blue); }
+        
+        /* Scrollbar estilizada para el teléfono */
+        .phone-screen::-webkit-scrollbar { width: 4px; }
+        .phone-screen::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                
+                <div class="step-container active" id="step1">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <div style="width: 50px; height: 50px; background: var(--accent-blue); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 25px; font-weight: bold; margin: 0 auto 10px;">S</div>
+                        <h2 style="color: var(--accent-blue);">Smart Pay</h2>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="text" class="form-input" value="demo@smartpay.com" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" value="123456" readonly>
+                    </div>
+                    <a href="dashboard.html" class="btn-primary" style="margin-bottom: 15px;">INGRESAR</a>
+                    <button class="btn-primary" style="background:none; color:var(--accent-orange); border: 1px solid var(--accent-orange);" onclick="goStep(2)">Crear cuenta nueva</button>
+                </div>
+
+                <div class="step-container" id="step2">
+                    <h3 style="margin-bottom: 15px; color: var(--accent-blue);">Datos Personales</h3>
+                    <input type="text" class="form-input" placeholder="Nombres">
+                    <input type="text" class="form-input" placeholder="Apellidos">
+                    <input type="email" class="form-input" placeholder="Correo electrónico">
+                    <label class="form-label" style="font-size: 11px;">Fecha de Nacimiento</label>
+                    <input type="date" class="form-input">
+                    <input type="password" class="form-input" placeholder="Contraseña">
+                    <input type="password" class="form-input" placeholder="Confirmar contraseña">
+                    <input type="tel" class="form-input" placeholder="Teléfono móvil (Ej: +58...)">
+                    
+                    <div class="nav-buttons">
+                        <button class="btn-primary btn-prev" onclick="goStep(1)">Atrás</button>
+                        <button class="btn-primary btn-next" onclick="goStep(3)">Siguiente</button>
+                    </div>
+                </div>
+
+                <div class="step-container" id="step3" style="text-align: center;">
+                    <div class="circle-icon">📲</div>
+                    <h3>Verifica tu móvil</h3>
+                    <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Ingresa el código enviado por SMS</p>
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;">
+                        <input type="text" maxlength="1" class="form-input" style="width: 40px; text-align: center;" value="5">
+                        <input type="text" maxlength="1" class="form-input" style="width: 40px; text-align: center;" value="2">
+                        <input type="text" maxlength="1" class="form-input" style="width: 40px; text-align: center;" value="9">
+                        <input type="text" maxlength="1" class="form-input" style="width: 40px; text-align: center;">
+                    </div>
+                    <button class="btn-primary" onclick="goStep(4)">Validar Código</button>
+                </div>
+
+                <div class="step-container" id="step4" style="text-align: center;">
+                    <div class="circle-icon">🤳</div>
+                    <h3>Biometría Facial</h3>
+                    <div style="width: 160px; height: 160px; border-radius: 50%; border: 3px solid var(--accent-orange); margin: 0 auto 20px; background: #eee; overflow: hidden;">
+                        <img src="https://via.placeholder.com/160?text=Scan+Face" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <button class="btn-primary" onclick="goStep(5)">Capturar Rostro</button>
+                </div>
+
+                <div class="step-container" id="step5">
+                    <h3 style="margin-bottom: 15px;">Documento ID</h3>
+                    <div style="width:100%; height:120px; background:#f8fafc; border:2px dashed #cbd5e1; border-radius:15px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; font-size:12px; color:#64748b;">Frente del Documento</div>
+                    <div style="width:100%; height:120px; background:#f8fafc; border:2px dashed #cbd5e1; border-radius:15px; display:flex; align-items:center; justify-content:center; margin-bottom:20px; font-size:12px; color:#64748b;">Reverso del Documento</div>
+                    <button class="btn-primary" onclick="goStep(6)">Finalizar Registro</button>
+                </div>
+
+                <div class="step-container" id="step6" style="text-align: center; justify-content: center;">
+                    <div style="font-size: 50px; margin-bottom: 15px;">🎉</div>
+                    <h2 style="color: var(--accent-blue);">¡Todo listo!</h2>
+                    <p style="font-size: 13px; color: var(--text-gray); margin-bottom: 25px;">Tu cuenta Smart Pay ha sido creada con éxito.</p>
+                    <button class="btn-primary" onclick="goStep(1)">Volver al Inicio</button>
+                </div>
+
+            </div>
+            <div class="phone-home"></div>
+        </div>
+
+        <div class="info-panel" id="info-content">
+            <h1 id="info-title">Configuración de Perfil</h1>
+            <div id="info-text">
+                <p style="color:var(--text-gray);">En este paso, el sistema recolecta los datos esenciales para la apertura de la cuenta digital:</p>
+                <ul style="margin-top:20px; text-align:left; font-size:14px; color:#444; line-height:1.8;">
+                    <li><b>Nombre y Apellido:</b> Identificación legal del titular.</li>
+                    <li><b>Correo Electrónico:</b> Canal principal para envío de comprobantes y alertas de seguridad.</li>
+                    <li><b>Fecha de Nacimiento:</b> Validación de mayoría de edad para contratos financieros.</li>
+                    <li><b>Contraseña y Validación:</b> Creación de clave robusta con doble confirmación para evitar errores de escritura.</li>
+                    <li><b>Teléfono Móvil:</b> Vinculación del dispositivo para el segundo factor de autenticación (SMS OTP).</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const infoData = {
+            1: { 
+                title: "Acceso Seguro", 
+                text: "Pantalla de entrada protegida. Permite el ingreso mediante credenciales encriptadas o el acceso al flujo de registro para nuevos clientes." 
+            },
+            2: { 
+                title: "Formulario de Registro", 
+                text: `
+                    <p><b>Descripción de campos:</b></p>
+                    <ul style="margin-top:10px; font-size:14px; line-height:1.6;">
+                        <li><b>Nombres/Apellidos:</b> Datos para KYC (Conoce a tu cliente).</li>
+                        <li><b>Email:</b> ID único de usuario y canal de soporte.</li>
+                        <li><b>Fecha Nacimiento:</b> Filtro legal de edad (+18).</li>
+                        <li><b>Doble Contraseña:</b> Asegura que el usuario no cometa errores en su clave de seguridad.</li>
+                        <li><b>Móvil:</b> Requerido para la firma digital de contratos vía SMS.</li>
+                    </ul>`
+            },
+            3: { 
+                title: "Verificación SMS", 
+                text: "El sistema envía un código OTP (One Time Password) de 4-6 dígitos. Sirve para validar que el teléfono ingresado pertenece realmente al usuario que se registra." 
+            },
+            4: { 
+                title: "Validación de Vida", 
+                text: "Mediante inteligencia artificial, el sistema solicita una selfie para confirmar que el usuario es una persona real y no un bot o una fotografía estática." 
+            },
+            5: { 
+                title: "Escaneo Documental", 
+                text: "Captura de identidad oficial. Se utiliza tecnología OCR para leer los datos del documento y compararlos con el formulario del Paso 2." 
+            },
+            6: { 
+                title: "Confirmación Final", 
+                text: "Cierre del proceso. Los datos son enviados al núcleo bancario para activar la línea de crédito y la billetera digital Smart Pay." 
+            }
+        };
+
+        function goStep(step) {
+            document.querySelectorAll('.step-container').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            
+            document.getElementById('info-title').innerHTML = infoData[step].title;
+            document.getElementById('info-text').innerHTML = infoData[step].text;
+        }
+    </script>
+</body>
+</html>

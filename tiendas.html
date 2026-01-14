@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Pay - Diario y Tiendas</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #f5c842 0%, #f5a742 50%, #6da5d9 100%);
+            --accent-orange: #f97316;
+            --accent-blue: #2563eb;
+            --dark-bg: #111111;
+            --white: #ffffff;
+            --text-gray: #6b7280;
+            --phone-bg: #f8fafc;
+            --success-green: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body { 
+            background: var(--primary-gradient);
+            background-attachment: fixed;
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; padding: 20px;
+        }
+
+        .presentation-container { display: flex; max-width: 1400px; width: 100%; gap: 50px; align-items: flex-start; }
+
+        /* --- MOCKUP TELÉFONO --- */
+        .phone-mockup {
+            width: 380px; height: 780px; background: var(--dark-bg);
+            border-radius: 50px; position: relative; padding: 12px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5); flex-shrink: 0;
+        }
+
+        .phone-screen {
+            width: 100%; height: 100%; background: var(--phone-bg);
+            border-radius: 40px; overflow: hidden; display: flex; flex-direction: column;
+            position: relative;
+        }
+
+        /* --- VISTAS OVERLAY --- */
+        .view-overlay {
+            position: absolute; top: 0; left: 100%; width: 100%; height: 100%;
+            background: var(--phone-bg); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100;
+            display: flex; flex-direction: column;
+        }
+        .view-overlay.active { left: 0; }
+        .view-header { background: var(--accent-blue); padding: 50px 20px 20px; color: white; display: flex; align-items: center; gap: 15px; }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        .header-diario { background: var(--accent-blue); padding: 50px 20px 30px; color: white; }
+        
+        .search-bar {
+            background: white; margin: -20px 20px 20px; padding: 12px 20px;
+            border-radius: 15px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .section-title { padding: 0 20px; font-size: 16px; font-weight: 800; color: var(--dark-bg); margin: 20px 0 15px; }
+
+        /* CATEGORÍAS */
+        .categories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 20px; }
+        .cat-item { 
+            background: white; padding: 15px 10px; border-radius: 20px; text-align: center; 
+            cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: 0.2s;
+        }
+        .cat-item:active { transform: scale(0.95); }
+        .cat-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+        .cat-item span { font-size: 11px; font-weight: 700; color: var(--text-gray); }
+
+        /* LISTADO TIENDAS */
+        .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+        .store-card {
+            background: white; margin: 0 20px 12px; padding: 15px; border-radius: 20px;
+            display: flex; align-items: center; gap: 15px; cursor: pointer; border: 1px solid #f1f5f9;
+        }
+        .store-img { width: 50px; height: 50px; background: #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .store-info h4 { font-size: 14px; color: var(--dark-bg); }
+        .store-info p { font-size: 11px; color: var(--text-gray); }
+
+        /* DEUDA PENDIENTE */
+        .pending-bill {
+            background: #fff4ed; margin: 20px; padding: 20px; border-radius: 22px;
+            border: 2px dashed var(--accent-orange);
+        }
+
+        /* FORMULARIOS */
+        .form-group { padding: 20px; }
+        .form-input { width: 100%; padding: 16px; border-radius: 14px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 16px; outline: none; }
+        .btn-primary { width: 100%; padding: 16px; background: var(--accent-orange); color: white; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; }
+
+        /* NAVBAR */
+        .bottom-nav { width: 100%; height: 80px; background: var(--dark-bg); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
+        .nav-item { color: var(--text-gray); text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .nav-active { color: var(--accent-orange) !important; }
+
+        /* INFO DERECHA */
+        .info-column { flex: 1.5; padding: 40px; background: rgba(255, 255, 255, 0.95); border-radius: 30px; max-height: 780px; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    <div class="phone-mockup">
+        <div class="phone-screen">
+            
+            <div class="header-diario">
+                <h2 style="font-size: 20px;">Compras Diario</h2>
+                <p style="font-size: 12px; opacity: 0.8;">Paga en una sola cuota</p>
+            </div>
+
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" placeholder="Buscar farmacia, comida..." style="border:none; outline:none; font-size:13px; width:100%;">
+            </div>
+
+            <div class="scroll-area">
+                <div class="categories-grid">
+                    <div class="cat-item" onclick="filtrar('Comida')"><span class="cat-icon">🍔</span><span>Comida</span></div>
+                    <div class="cat-item" onclick="filtrar('Salud')"><span class="cat-icon">💊</span><span>Salud</span></div>
+                    <div class="cat-item" onclick="filtrar('Hogar')"><span class="cat-icon">🛠️</span><span>Hogar</span></div>
+                </div>
+
+                <div class="section-title">Tiendas Cercanas</div>
+                <div id="listaTiendas">
+                    <div class="store-card" onclick="abrirCompra('Arturos', '🍔')">
+                        <div class="store-img">🍔</div>
+                        <div class="store-info"><h4>Arturos</h4><p>Comida Rápida • Av. Principal</p></div>
+                    </div>
+                    <div class="store-card" onclick="abrirCompra('Farmahorro', '💊')">
+                        <div class="store-img">💊</div>
+                        <div class="store-info"><h4>Farmahorro</h4><p>Salud y Bienestar • 24 Horas</p></div>
+                    </div>
+                    <div class="store-card" onclick="abrirCompra('EPA', '🛠️')">
+                        <div class="store-img">🛠️</div>
+                        <div class="store-info"><h4>Ferretería EPA</h4><p>Hogar y Construcción</p></div>
+                    </div>
+                </div>
+
+                <div class="section-title">Pendiente por Pagar</div>
+                <div class="pending-bill">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <small style="color:var(--accent-orange); font-weight:800;">CUOTA PENDIENTE</small>
+                            <h3 style="font-size: 24px;">$15.50</h3>
+                        </div>
+                        <button onclick="openView('viewPagarCuota')" style="padding:10px 15px; border-radius:12px; border:none; background:var(--dark-bg); color:white; font-weight:bold; cursor:pointer;">Pagar Ya</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="viewComprar" class="view-overlay">
+                <div class="view-header"><span onclick="closeView('viewComprar')" style="cursor:pointer">←</span><b id="txtTienda">Tienda</b></div>
+                <div class="form-group">
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <div id="iconTienda" style="font-size:50px; margin-bottom:10px;">🍔</div>
+                        <p style="color:var(--text-gray);">Ingrese el monto de su consumo</p>
+                    </div>
+                    <label style="font-size:11px; font-weight:bold; color:var(--text-gray);">MONTO DE LA COMPRA ($)</label>
+                    <input type="number" class="form-input" id="montoCompra" placeholder="0.00">
+                    
+                    <div style="background:#f1f5f9; padding:15px; border-radius:15px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span>Cuotas:</span><b>1 Sola Cuota</b>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:5px; color:var(--success-green);">
+                            <span>Interés:</span><b>0% Gratis</b>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="confirmarCompra()">Finalizar Compra</button>
+                </div>
+            </div>
+
+            <div id="viewPagarCuota" class="view-overlay">
+                <div class="view-header"><span onclick="closeView('viewPagarCuota')" style="cursor:pointer">←</span><b>Pagar Pendiente</b></div>
+                <div class="form-group">
+                    <div class="pending-bill" style="margin:0 0 20px 0;">
+                        <p>Total a pagar:</p>
+                        <h2 style="font-size:32px;">$15.50</h2>
+                    </div>
+                    <label>MÉTODO DE PAGO</label>
+                    <div class="store-card" style="margin:0 0 10px 0;"><b>Billetera Smart Pay</b></div>
+                    <div class="store-card" style="margin:0 0 20px 0;"><b>Pago Móvil / Transferencia</b></div>
+                    
+                    <button class="btn-primary" style="background:var(--success-green);" onclick="exitoPago()">Confirmar Pago</button>
+                </div>
+            </div>
+
+            <div id="viewExito" class="view-overlay" style="z-index:200;">
+                <div style="padding:100px 20px; text-align:center;">
+                    <div style="width:80px; height:80px; background:var(--success-green); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; margin:0 auto 20px;">✓</div>
+                    <h2 id="msgExito">¡Compra Exitosa!</h2>
+                    <p style="color:var(--text-gray); margin-top:10px;">La operación se ha procesado correctamente.</p>
+                    <button class="btn-primary" style="margin-top:40px; background:var(--dark-bg);" onclick="location.reload()">Regresar</button>
+                </div>
+            </div>
+
+            <nav class="bottom-nav">
+                <div class="nav-item" onclick="window.location.href='dashboard.html'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><br>Inicio
+                </div>
+                <div class="nav-item nav-active" onclick="window.location.href='tiendas.html'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg><br>Diario
+                </div>
+                <div class="nav-item" onclick="window.location.href='billetera.html'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><rect x="6" y="8" width="12" height="8" rx="1"></rect><line x1="18" y1="12" x2="18.01" y2="12"></line></svg><br>Billetera
+                </div>
+                <div class="nav-item" onclick="window.location.href='avance.html'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg><br>Avance
+                </div>
+                <div class="nav-item" onclick="window.location.href='perfil.html'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><br>Perfil
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div class="info-column">
+        <h1>Módulo "Diario" (Micro-créditos)</h1>
+        <p>Este módulo está diseñado para compras de alta frecuencia que no requieren financiamiento a largo plazo.</p>
+
+        <div class="tag">Consumo Inmediato</div>
+        <h2>1. Política de Una Cuota</h2>
+        <p>A diferencia del Dashboard principal, aquí las compras se liquidan en un solo pago (generalmente a los 7 o 15 días). Esto permite al usuario comprar comida o medicinas sin intereses adicionales.</p>
+
+        <h2>2. Segmentación de Tiendas</h2>
+        <ul style="list-style:none; font-size:13px; color:var(--text-gray);">
+            <li style="margin-bottom:8px;">✅ <b>Comida Rápida:</b> Arturos, KFC, BK.</li>
+            <li style="margin-bottom:8px;">✅ <b>Salud:</b> Farmahorro, Farmatodo.</li>
+            <li style="margin-bottom:8px;">✅ <b>Hogar:</b> EPA, Ferreterías locales.</li>
+        </ul>
+
+        <h2>3. Gestión de Cobranza</h2>
+        <p>El usuario visualiza de forma prominente su <b>Deuda Diario</b>. El sistema bloquea nuevas compras en este módulo si existe una cuota vencida, asegurando la salud financiera del ecosistema.</p>
+
+        <div class="tag" style="background:#dcfce7; color:#166534;">UX Optimizada</div>
+        <p>El flujo de compra se reduce a 2 pasos: Monto y Confirmación, facilitando el uso en puntos de venta físicos.</p>
+    </div>
+</div>
+
+<script>
+    function openView(id) { document.getElementById(id).classList.add('active'); }
+    function closeView(id) { document.getElementById(id).classList.remove('active'); }
+
+    function abrirCompra(nombre, icono) {
+        document.getElementById('txtTienda').innerText = nombre;
+        document.getElementById('iconTienda').innerText = icono;
+        openView('viewComprar');
+    }
+
+    function confirmarCompra() {
+        const monto = document.getElementById('montoCompra').value;
+        if(monto <= 0) { alert("Ingrese un monto válido"); return; }
+        document.getElementById('msgExito').innerText = "¡Compra Exitosa!";
+        openView('viewExito');
+    }
+
+    function exitoPago() {
+        document.getElementById('msgExito').innerText = "¡Pago Procesado!";
+        openView('viewExito');
+    }
+
+    function filtrar(cat) {
+        alert("Filtrando tiendas de " + cat);
+    }
+</script>
+
+</body>
+</html>

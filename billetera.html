@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Pay - Billetera Integral Pro</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #f5c842 0%, #f5a742 50%, #6da5d9 100%);
+            --accent-orange: #f97316;
+            --accent-blue: #2563eb;
+            --dark-bg: #111111;
+            --white: #ffffff;
+            --text-gray: #6b7280;
+            --phone-bg: #f8fafc;
+            --success-green: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body { 
+            background: var(--primary-gradient);
+            background-attachment: fixed;
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; padding: 20px;
+        }
+
+        .presentation-container { display: flex; max-width: 1400px; width: 100%; gap: 50px; align-items: flex-start; }
+
+        /* --- MOCKUP TELÉFONO --- */
+        .phone-mockup {
+            width: 380px; height: 780px; background: var(--dark-bg);
+            border-radius: 50px; position: relative; padding: 12px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5); flex-shrink: 0;
+        }
+
+        .phone-screen {
+            width: 100%; height: 100%; background: var(--phone-bg);
+            border-radius: 40px; overflow: hidden; display: flex; flex-direction: column;
+            position: relative;
+        }
+
+        /* --- OVERLAYS --- */
+        .view-overlay {
+            position: absolute; top: 0; left: 100%; width: 100%; height: 100%;
+            background: var(--phone-bg); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100;
+            display: flex; flex-direction: column;
+        }
+        .view-overlay.active { left: 0; }
+        .view-header { background: var(--accent-blue); padding: 50px 20px 20px; color: white; display: flex; align-items: center; gap: 15px; }
+
+        /* --- ESTILOS BILLETERA --- */
+        .wallet-header { background: var(--accent-blue); padding: 50px 20px 30px; color: white; text-align: center; }
+        .balance-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            margin: -25px 20px 20px; padding: 25px; border-radius: 20px;
+            color: white; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .action-buttons { display: flex; justify-content: space-around; padding: 0 20px 20px; gap: 10px; }
+        .action-btn { flex: 1; border: none; background: white; padding: 12px; border-radius: 12px; font-size: 11px; font-weight: bold; color: var(--accent-blue); cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        
+        .section-title { padding: 0 20px; font-size: 15px; font-weight: 800; color: var(--dark-bg); margin-bottom: 15px; }
+        .history-list { flex: 1; overflow-y: auto; padding: 0 20px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f1f5f9; }
+
+        /* --- SERVICIOS GRID --- */
+        .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 20px 20px; }
+        .service-item-btn { text-align: center; cursor: pointer; transition: 0.2s; }
+        .service-item-btn:active { transform: scale(0.9); }
+        .service-icon { background: white; padding: 12px; border-radius: 12px; margin-bottom: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 20px; }
+
+        /* --- FORMULARIOS --- */
+        .form-group { padding: 20px; }
+        label { display: block; font-size: 11px; color: var(--text-gray); margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        .form-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 16px; outline: none; }
+        .btn-primary { width: 100%; padding: 16px; background: var(--accent-orange); color: white; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; }
+
+        .card-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #e2e8f0; cursor: pointer; }
+
+        /* --- NAVBAR --- */
+        .bottom-nav { width: 100%; height: 80px; background: var(--dark-bg); display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
+        .nav-item { color: var(--text-gray); text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .nav-active { color: var(--accent-orange) !important; }
+
+        /* --- INFO DERECHA --- */
+        .info-column { flex: 1.5; padding: 40px; background: rgba(255, 255, 255, 0.95); border-radius: 30px; max-height: 780px; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .info-column h1 { color: var(--dark-bg); margin-bottom: 20px; border-bottom: 3px solid var(--accent-orange); display: inline-block; }
+        .info-column h2 { color: var(--accent-blue); font-size: 18px; margin-top: 25px; margin-bottom: 10px; }
+        .security-badge { background: #dcfce7; color: #166534; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; border-left: 4px solid #22c55e; margin-bottom: 15px; }
+        .tech-list li { background: white; padding: 10px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #eee; font-size: 13px; list-style: none; }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    <div class="phone-mockup">
+        <div class="phone-screen">
+            <div class="wallet-header">
+                <h2 style="font-size: 18px;">Mi Billetera</h2>
+            </div>
+            <div class="balance-card">
+                <p style="font-size: 10px; opacity: 0.8;">SALDO DISPONIBLE</p>
+                <div style="font-size: 32px; font-weight: 800;">$1,240.50</div>
+            </div>
+
+            <div class="action-buttons">
+                <div class="action-btn" onclick="openView('viewEnviarDestino')"><i>⬆️</i>Enviar</div>
+                <div class="action-btn" onclick="openView('viewRecibir')"><i>⬇️</i>Recibir</div>
+                <div class="action-btn" onclick="openView('viewRecargar')"><i>➕</i>Recargar</div>
+            </div>
+
+            <div class="section-title">Servicios Públicos</div>
+            <div class="services-grid">
+                <div class="service-item-btn" onclick="openServicio('Luz', ['Corpoelec'])">
+                    <div class="service-icon">💡</div><span style="font-size:10px;">Luz</span>
+                </div>
+                <div class="service-item-btn" onclick="openServicio('Agua', ['Hidrocapital'])">
+                    <div class="service-icon">💧</div><span style="font-size:10px;">Agua</span>
+                </div>
+                <div class="service-item-btn" onclick="openServicio('Teléfono', ['Movilnet', 'Movistar', 'Digitel', 'CANTV'])">
+                    <div class="service-icon">📞</div><span style="font-size:10px;">Teléfono</span>
+                </div>
+                <div class="service-item-btn" onclick="openServicio('Internet', ['Fibex', 'Thundernet', 'WLink Telecom'])">
+                    <div class="service-icon">🌐</div><span style="font-size:10px;">Internet</span>
+                </div>
+                <div class="service-item-btn" onclick="openServicio('Televisión', ['Netflix', 'Supercable'])">
+                    <div class="service-icon">📺</div><span style="font-size:10px;">Cable</span>
+                </div>
+                <div class="service-item-btn" onclick="openServicio('Gas', ['PDVSA Gas'])">
+                    <div class="service-icon">🔥</div><span style="font-size:10px;">Gas</span>
+                </div>
+            </div>
+
+            <div class="section-title">Actividad Reciente</div>
+            <div class="history-list" id="historial"></div>
+
+            <div id="viewEnviarDestino" class="view-overlay">
+                <div class="view-header"><span onclick="closeView('viewEnviarDestino')" style="cursor:pointer">←</span><b>Enviar Dinero</b></div>
+                <div class="form-group">
+                    <label>BUSCAR DESTINATARIO</label>
+                    <input type="text" class="form-input" id="destinatario" placeholder="ID o Teléfono">
+                    <button class="btn-primary" onclick="irAMonto()">Siguiente</button>
+                </div>
+            </div>
+
+            <div id="viewEnviarMonto" class="view-overlay">
+                <div class="view-header"><span onclick="closeView('viewEnviarMonto')" style="cursor:pointer">←</span><b>Monto a Enviar</b></div>
+                <div class="form-group" style="text-align: center;">
+                    <input type="number" class="form-input" id="montoEnvio" style="font-size: 40px; text-align: center; border:none;" placeholder="0.00">
+                    <div style="background: #eef2ff; padding: 15px; border-radius: 15px;">
+                        <span style="font-size: 12px; color: var(--accent-blue);">Para: <b id="displayDestino">...</b></span>
+                    </div>
+                    <button class="btn-primary" style="margin-top: 30px;" onclick="irAConfirmacion()">Revisar Envío</button>
+                </div>
+            </div>
+
+            <div id="viewConfirmarEnvio" class="view-overlay">
+                <div class="view-header"><span onclick="closeView('viewConfirmarEnvio')" style="cursor:pointer">←</span><b>Confirmar</b></div>
+                <div class="form-group">
+                    <div class="card-item">
+                        <p>Destino: <b id="confDest">...</b></p>
+                        <p>Total: <b id="confTotal">$0.00</b></p>
+                        <p style="color:var(--success-green)">Comisión: $0.00</p>
+                    </div>
+                    <button class="btn-primary" onclick="procesarFinalEnvio()">Confirmar y Enviar</button>
+                </div>
+            </div>
+
+            <div id="viewServicioDetalle" class="view-overlay">
+                <div class="view-header"><span onclick="closeView('viewServicioDetalle')" style="cursor:pointer">←</span><b id="tituloServicio">Servicio</b></div>
+                <div class="form-group" id="listaProveedores"></div>
+            </div>
+
+            <div id="viewPagoServicio" class="view-overlay" style="z-index:150;">
+                <div class="view-header"><span onclick="closeView('viewPagoServicio')" style="cursor:pointer">←</span><b>Pago de Factura</b></div>
+                <div class="form-group">
+                    <div class="security-badge" style="background:#f1f5f9; color:#334155; border-left-color:var(--accent-blue)">
+                        Proveedor: <b id="proveedorSeleccionado">...</b>
+                    </div>
+                    <label>Contrato / Referencia</label>
+                    <input type="text" class="form-input" placeholder="Ej: 000123456">
+                    <label>Monto a Pagar ($)</label>
+                    <input type="number" class="form-input" placeholder="0.00">
+                    <button class="btn-primary" onclick="openView('viewTicketExitoGeneral')">Pagar Factura</button>
+                </div>
+            </div>
+
+            <div id="viewRecibir" class="view-overlay">
+                <div class="view-header"><span onclick="closeView('viewRecibir')" style="cursor:pointer">←</span><b>Mi Código QR</b></div>
+                <div class="form-group" style="text-align:center;">
+                    <div style="width:200px; height:200px; background:#eee; margin:20px auto; border:10px solid white; box-shadow:0 10px 20px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center;">[QR CODE]</div>
+                    <p>ID: <b>SP-992834</b></p>
+                </div>
+            </div>
+
+            <div id="viewRecargar" class="view-overlay">
+                <div class="view-header"><span onclick="closeView('viewRecargar')" style="cursor:pointer">←</span><b>Recargar Saldo</b></div>
+                <div class="form-group">
+                    <label>Método de Recarga</label>
+                    <div class="card-item"><b>Pago Móvil (Instantáneo)</b></div>
+                    <div class="card-item"><b>Transferencia Bancaria</b></div>
+                    <div class="card-item"><b>Zelle / Binance</b></div>
+                </div>
+            </div>
+
+            <div id="viewTicketExitoGeneral" class="view-overlay" style="z-index: 500;">
+                <div style="padding: 100px 20px; text-align: center;">
+                    <div style="width:70px; height:70px; background:var(--success-green); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:35px; margin:0 auto 20px;">✓</div>
+                    <h2 style="color:var(--success-green);">Operación Exitosa</h2>
+                    <p style="color:var(--text-gray); margin-bottom:30px;">La transacción ha sido procesada correctamente.</p>
+                    <button class="btn-primary" style="background:var(--dark-bg)" onclick="location.reload()">Regresar al Inicio</button>
+                </div>
+            </div>
+
+            <nav class="bottom-nav">
+    <div class="nav-item nav-active" onclick="window.location.href='dashboard.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <br>Inicio
+    </div>
+    <div class="nav-item" onclick="window.location.href='tiendas.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <br>Diario
+    </div>
+    <div class="nav-item" onclick="window.location.href='billetera.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <rect x="6" y="8" width="12" height="8" rx="1"></rect>
+            <line x1="18" y1="12" x2="18.01" y2="12"></line>
+        </svg>
+        <br>Billetera
+    </div>
+    <div class="nav-item" onclick="window.location.href='avance.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+            <line x1="19" y1="8" x2="19" y2="14"></line>
+            <line x1="22" y1="11" x2="16" y2="11"></line>
+        </svg>
+        <br>Avance
+    </div>
+    <div class="nav-item" onclick="window.location.href='perfil.html'" style="cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <br>Perfil
+    </div>
+</nav>
+
+        </div>
+    </div>
+
+    <div class="info-column">
+        <h1>Smart Pay: Ecosistema Financiero</h1>
+        
+        <h2>🛡️ Capas de Seguridad</h2>
+        <div class="security-badge">Cifrado de grado militar AES-256 en base de datos.</div>
+        <p>Cada movimiento genera un <b>Hash Único de Transacción</b> que impide la duplicidad de pagos y asegura la integridad del libro contable.</p>
+
+        <h2>📞 Integración de Servicios</h2>
+        <p>Hemos configurado la jerarquía solicitada de servicios y sub-servicios:</p>
+        <ul class="tech-list">
+            <li><b>Luz:</b> Corpoelect (vía API oficial).</li>
+            <li><b>Teléfono:</b> Movilnet, Movistar, Digitel, CANTV (Recargas en tiempo real).</li>
+            <li><b>Internet:</b> Fibex, Thundernet, WLink Telecom.</li>
+            <li><b>TV:</b> Netflix, Supercable.</li>
+            <li><b>Gas:</b> PDVSA Gas (Gestión gubernamental).</li>
+        </ul>
+
+        <h2>💸 Transferencias P2P / P2B</h2>
+        <p>El flujo de envío permite mover capital entre personas y comercios de forma instantánea, eliminando el tiempo de espera bancario de 24-48 horas.</p>
+        
+        <h2>📊 UX y Arquitectura</h2>
+        <p>El uso de <b>Overlays Activos</b> permite una navegación fluida (SPA - Single Page Application) dentro del mockup del teléfono, simulando una app nativa de alto rendimiento.</p>
+    </div>
+</div>
+
+<script>
+    function openView(id) { document.getElementById(id).classList.add('active'); }
+    function closeView(id) { document.getElementById(id).classList.remove('active'); }
+
+    // Lógica Enviar
+    function irAMonto() {
+        const dest = document.getElementById('destinatario').value;
+        if(!dest) return alert('Ingrese un destinatario');
+        document.getElementById('displayDestino').innerText = dest;
+        openView('viewEnviarMonto');
+    }
+
+    function irAConfirmacion() {
+        const monto = document.getElementById('montoEnvio').value;
+        if(monto <= 0) return alert('Monto inválido');
+        document.getElementById('confDest').innerText = document.getElementById('destinatario').value;
+        document.getElementById('confTotal').innerText = '$' + monto;
+        openView('viewConfirmarEnvio');
+    }
+
+    function procesarFinalEnvio() {
+        openView('viewTicketExitoGeneral');
+    }
+
+    // Lógica Servicios
+    function openServicio(nombre, proveedores) {
+        document.getElementById('tituloServicio').innerText = 'Pagar ' + nombre;
+        const lista = document.getElementById('listaProveedores');
+        lista.innerHTML = '<label>Seleccione el Proveedor</label>';
+        proveedores.forEach(prov => {
+            const div = document.createElement('div');
+            div.className = 'card-item';
+            div.style.fontWeight = 'bold';
+            div.innerHTML = prov;
+            div.onclick = () => {
+                document.getElementById('proveedorSeleccionado').innerText = prov;
+                openView('viewPagoServicio');
+            };
+            lista.appendChild(div);
+        });
+        openView('viewServicioDetalle');
+    }
+
+    // Historial Dinámico
+    const hist = document.getElementById('historial');
+    const tipos = ['Pago Luz', 'Transferencia', 'Recarga', 'Internet'];
+    for(let i=0; i<10; i++) {
+        const t = tipos[Math.floor(Math.random()*tipos.length)];
+        hist.innerHTML += `<div class="history-item"><div><b>${t}</b><br><small>Hoy</small></div><div style="color:${t==='Recarga'?'var(--success-green)':'var(--accent-orange)'}">${t==='Recarga'?'+':'-'}$${(Math.random()*40).toFixed(2)}</div></div>`;
+    }
+</script>
+</body>
+</html>

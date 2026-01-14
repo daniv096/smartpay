@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Pay - Perfil Corporativo</title>
+    <style>
+        /* PALETA DE COLORES SMART PAY */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #f5c842 0%, #f5a742 50%, #6da5d9 100%);
+            --accent-orange: #f97316;
+            --accent-blue: #2563eb;
+            --dark-bg: #111111;
+            --white: #ffffff;
+            --text-gray: #6b7280;
+            --phone-bg: #f8fafc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body { 
+            background: var(--primary-gradient);
+            background-attachment: fixed;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .presentation-container {
+            display: flex;
+            max-width: 1300px;
+            width: 100%;
+            gap: 50px;
+            align-items: center;
+        }
+
+        /* --- COLUMNA IZQUIERDA: MOCKUP --- */
+        .mockup-column { flex: 1; display: flex; justify-content: center; }
+
+        .phone-mockup {
+            width: 380px;
+            height: 780px;
+            background: var(--dark-bg);
+            border-radius: 50px;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            padding: 12px;
+        }
+
+        .phone-notch {
+            width: 150px; height: 25px; background: #000;
+            position: absolute; top: 0; left: 50%;
+            transform: translateX(-50%); border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .phone-screen {
+            width: 100%; height: 100%;
+            background: var(--phone-bg);
+            border-radius: 40px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Cabecera Fija */
+        .profile-header { 
+            background: var(--accent-blue); 
+            padding: 50px 20px 25px; 
+            color: white; 
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .profile-pic { width: 80px; height: 80px; border-radius: 50%; border: 3px solid white; margin-bottom: 12px; }
+
+        /* Contenido con Scroll Independiente */
+        .scrollable-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding-bottom: 30px; 
+        }
+        
+        .xp-section { 
+            background: white; 
+            margin: 20px; /* Separado de la cabecera */
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+        }
+        .progress-bar { height: 10px; background: #e2e8f0; border-radius: 5px; margin: 12px 0; overflow: hidden; }
+        .progress-fill { width: 75%; height: 100%; background: var(--accent-orange); }
+
+        .menu-item { 
+            background: white; margin: 8px 20px; padding: 16px; 
+            border-radius: 14px; display: flex; align-items: center; 
+            gap: 15px; border: 1px solid #f1f5f9; font-size: 14px;
+            cursor: pointer; transition: 0.2s;
+        }
+        .menu-item:hover { background: #f1f5f9; }
+
+        /* BARRA DE NAVEGACIÓN (TU CÓDIGO) */
+        .bottom-nav { 
+            width: 100%; height: 80px; background: var(--dark-bg); 
+            display: flex; justify-content: space-around; align-items: center; 
+            flex-shrink: 0;
+        }
+        .nav-item { color: var(--text-gray); text-align: center; font-size: 10px; font-weight: bold; }
+        .nav-active { color: var(--accent-orange) !important; }
+
+        /* --- COLUMNA DERECHA: DESCRIPCIONES --- */
+        .info-column { flex: 1.5; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .doc-header h1 { font-size: 32px; color: var(--accent-blue); margin-bottom: 10px; }
+        .feature-card { 
+            background: white; padding: 15px; border-radius: 12px; 
+            margin-bottom: 15px; border-left: 5px solid var(--accent-orange); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .feature-card h3 { color: var(--accent-blue); margin-bottom: 5px; font-size: 18px; }
+        .feature-card p { font-size: 14px; color: var(--text-gray); line-height: 1.5; }
+
+        @media (max-width: 1000px) { .presentation-container { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    
+    <div class="mockup-column">
+        <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="profile-header">
+                    <img src="https://ui-avatars.com/api/?name=J+M&background=f97316&color=fff" class="profile-pic">
+                    <h2>Jorge Martinez</h2>
+                    <p style="font-size: 12px; opacity: 0.9;">ID Usuario: #45829</p>
+                </div>
+
+                <div class="scrollable-content">
+                    <div class="xp-section">
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 800;">
+                            <span style="color: var(--accent-blue);">NIVEL PLATINUM</span>
+                            <span style="color: var(--accent-orange);">2,450 XP</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill"></div></div>
+                        <p style="font-size: 10px; text-align: center; color: var(--text-gray);">Faltan 550 XP para el nivel Diamond</p>
+                    </div>
+
+                    <div class="menu-item" onclick="openView('viewProfile')"><span>👤</span><b>Mis Datos Personales</b></div>
+                    <div class="menu-item" onclick="openView('viewWallet')"><span>💳</span><b>Métodos de Pago</b></div>
+                    <div class="menu-item" onclick="openView('viewSecurity')"><span>🛡️</span><b>Seguridad y Privacidad</b></div>
+                    <div class="menu-item"><span>🔔</span><b>Notificaciones</b></div>
+                    <div class="menu-item"><span>📄</span><b>Términos y Condiciones</b></div>
+                    <div class="menu-item"><span>🎧</span><b>Soporte Técnico</b></div>
+                    <div class="menu-item" style="color: var(--accent-orange); margin-top: 10px;"><span>🚪</span><b>Cerrar Sesión</b></div>
+                </div>
+
+                <nav class="bottom-nav">
+                    <div class="nav-item" onclick="window.location.href='dashboard.html'" style="cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                        <br>Inicio
+                    </div>
+                    <div class="nav-item" onclick="window.location.href='tiendas.html'" style="cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        <br>Diario
+                    </div>
+                    <div class="nav-item" onclick="window.location.href='billetera.html'" style="cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <rect x="6" y="8" width="12" height="8" rx="1"></rect>
+                            <line x1="18" y1="12" x2="18.01" y2="12"></line>
+                        </svg>
+                        <br>Billetera
+                    </div>
+                    <div class="nav-item" onclick="window.location.href='avance.html'" style="cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                            <line x1="19" y1="8" x2="19" y2="14"></line>
+                            <line x1="22" y1="11" x2="16" y2="11"></line>
+                        </svg>
+                        <br>Avance
+                    </div>
+                    <div class="nav-item nav-active" onclick="window.location.href='perfil.html'" style="cursor:pointer;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <br>Perfil
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-column">
+        <div class="doc-header">
+            <h1>Módulo: Mi Perfil</h1>
+            <p style="color: var(--text-gray); margin-bottom: 25px;">Gestión de usuario y fidelización (Smart Pay)</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>👤 Gestión de Identidad (KYC)</h3>
+            <p><b>Qué hace:</b> Centraliza la información legal y de contacto del usuario.</p>
+            <p><b>Propósito:</b> Asegura que el cliente esté debidamente identificado para procesos crediticios y cumplimiento de normativas antifraude.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>📈 Motor de Gamificación (XP)</h3>
+            <p><b>Qué hace:</b> Sistema de puntos basado en el comportamiento de pago puntual.</p>
+            <p><b>Propósito:</b> Reduce el riesgo de impago (Default) al incentivar al usuario a mantener un buen récord para desbloquear mejores tasas y límites.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>💳 Wallet y Auto-Pago</h3>
+            <p><b>Qué hace:</b> Administra las tarjetas y cuentas vinculadas para el fondeo de cuotas.</p>
+            <p><b>Propósito:</b> Optimiza la cobranza mediante el débito automático, garantizando la salud financiera de la plataforma.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>🛡️ Centro de Seguridad</h3>
+            <p><b>Qué hace:</b> Configuración de biometría y claves transaccionales.</p>
+            <p><b>Propósito:</b> Protege los fondos del usuario contra accesos no autorizados, cumpliendo con estándares de seguridad bancaria.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Función compatible con tu dashboard.html
+    function openView(id) {
+        console.log("Navegando a: " + id);
+    }
+</script>
+
+</body>
+</html>
